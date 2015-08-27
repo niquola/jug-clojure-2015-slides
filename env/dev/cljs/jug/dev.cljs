@@ -4,8 +4,14 @@
 
 (enable-console-print!)
 
+(def ws
+  (let [l (.-location js/window)]
+    (str "ws://" (.-hostname l) ":3449/figwheel-ws")))
+
+(.log js/console ws)
+
 (figwheel/watch-and-reload
-  :websocket-url "ws://localhost:3449/figwheel-ws"
+  :websocket-url ws 
   :jsload-callback core/mount-root)
 
 (core/init!)

@@ -12,10 +12,15 @@
                  [reagent-utils "0.1.5"]
                  [ring "1.4.0"]
                  [ring/ring-defaults "0.1.5"]
+                 [org.postgresql/postgresql "9.3-1101-jdbc41"]
+                 [prismatic/schema "0.4.4"]
                  [prone "0.8.2"]
+                 [org.clojure/java.jdbc "0.3.7"]
+                 [honeysql "0.6.0"]
                  [compojure "1.4.0"]
                  [hiccup "1.0.5"]
                  [environ "1.0.0"]
+                 [cheshire "5.5.0"]
                  [org.clojure/clojurescript "1.7.107" :scope "provided"]
                  [secretary "1.2.3"]]
 
@@ -53,6 +58,7 @@
                    :dependencies [[ring/ring-mock "0.2.0"]
                                   [ring/ring-devel "1.4.0"]
                                   [lein-figwheel "0.3.7"]
+                                  [im.chit/vinyasa "0.3.4"]
                                   [org.clojure/tools.nrepl "0.2.10"]
                                   [pjstadig/humane-test-output "0.7.0"]]
 
