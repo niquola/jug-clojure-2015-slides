@@ -2,9 +2,35 @@
     (:require [reagent.core :as reagent :refer [atom]]
               [cljs.reader :as reader]))
 
-(def state (atom {:form {:name "nicola"
+(def state (atom {:form {:sender "nicola"
                          :expr "(+ 1 1)"}
                   :messages [{:id 1 :sender "igor" :expr "1" :result "1"}]}))
+
+(defonce socket (atom nil))
+
+(def encode pr-str)
+(def decode reader/read-string)
+
+(defn log [lbl x] (.log js/console lbl (pr-str x)))
+
+(defn send [msg]
+  (when-let [ws @socket]
+    (.send ws (encode msg))))
+
+(defn on-receive [data]
+  (let [msg (decode data)]
+    (log "Data from ws:" msg)
+    (swap! state update-in [:messages] into msg)))
+
+(defn init-socket []
+  (let [l (.-location js/window)
+        url (str "ws://" (.-hostname l) ":" (.-port l) "/repl")
+        ws (js/WebSocket. url)]
+    (.log js/console ws)
+    (reset! socket ws)
+    (aset ws "onmessage" (fn [ev] (on-receive (.-data ev))))
+    (aset ws "onclose" init-socket)))
+
 
 (defn mk-setter [pth]
   (fn [v] (swap! state update-in pth v)))
@@ -21,8 +47,7 @@
                :value (get-in @state pth)}))
 
 (defn send-message [data]
-  (->> [(merge data {:id (gensym) :sender "???" :result "???"})]
-       (swap! state update-in [:messages] into))
+  (send (merge data {:id (gensym)  :result "???"}))
   (swap! state update-in [:form] merge {:expr ""}))
 
 
@@ -31,19 +56,19 @@
    [:p "jug-repl"]
    #_[:pre (pr-str @state)]
    [:form {:on-submit (on-submit [:form] send-message)}
-    [:input (bind [:form :name] {:placeholder "name"}) ]
-    [:input (bind [:form :expr] {:placeholder "expr"}) ]
+    [:input (bind [:form :sender] {:placeholder "name"}) ]
+    [:input (bind [:form :expr] {:placeholder "expr" :required true}) ]
     [:button.btn {:type "submit"} "submit"]]
    [:hr]
    [:div.messages
     (for [m (:messages @state)]
-      [:div.messages {:key (:id m)}
-       [:pre.col-md-8 [:b (:sender m)] (:expr m)]
-       [:pre.col-md-4.res (:result m)]])]])
+      [:pre.messages {:key (:id m)}
+       [:b (:sender m)] ":  " (:expr m) " => " (:result m)])]])
 
 (defn mount-root []
   (reagent/render [home-page]
                   (.getElementById js/document "app")))
 
 (defn init! []
+  (init-socket)
   (mount-root))
