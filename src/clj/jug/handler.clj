@@ -9,7 +9,7 @@
             [org.httpkit.server :as ohs]
             [cheshire.core :as json]
             [jug.db :as db]
-            [clojure.stacktrace :as trc]
+            [clojure.stacktrace :as trace]
             [environ.core :refer [env]]))
 
 (def home-page
@@ -29,10 +29,17 @@
        " in order to start the compiler"]]
      (include-js "js/app.js")]]))
 
+(defn repl-eval [s]
+  (with-out-str
+    (try (println (eval
+                   (read-string s)))
+         (catch Exception e
+           (println (trace/print-stack-trace e))))))
+
+
 (def clients (atom #{}))
 
 (def messages (atom []))
-
 
 
 (defn on-close [ch]
@@ -55,8 +62,11 @@
         (catch Exception e
           (println (pr-str e)))))))
 
+(defn process-msg [msg]
+  (assoc msg :result (repl-eval (:expr msg))))
+
 (defn on-message [data]
-  (let [msg (decode data)]
+  (let [msg (process-msg (decode data))]
     (swap! messages conj msg)
     (broad-cast [msg])))
 
