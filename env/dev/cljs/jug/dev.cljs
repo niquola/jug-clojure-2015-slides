@@ -6,7 +6,7 @@
 
 (def ws
   (let [l (.-location js/window)]
-    (str "ws://" (.-hostname l) ":3449/figwheel-ws")))
+    (str "ws://" (.-hostname l) ":3001/figwheel-ws")))
 
 (.log js/console ws)
 

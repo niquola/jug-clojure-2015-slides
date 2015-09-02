@@ -1,8 +1,62 @@
-(ns jug.hello)
+(ns jug.hello
+  (:require [clojure.string :as str]))
+
+(defmacro WHAT [& x])
+(defmacro HOW [& x])
+(defmacro THIS [& x])
+(defmacro JS [& x])
+(defmacro AST-JSON [& x])
+
+(WHAT is clojure?)
+
+(THIS is
+      functional LISP
+      on JVM (JS, CLR)
+      for concurrency)
+
+(HOW old is clojure?)
+
+(def clj-birth-date #inst "2007-01-01")
+
+(->
+ (.getTime (java.util.Date.))
+ (- (.getTime clj-birth-date))
+ (/ (* 360 24 60 60 1000))
+ (float))
 
 
+(WHAT is LISP?)
 
-"Primitives"
+(JS function sum(a, b) { return a*a + b*b })
+
+(AST-JSON node -> ["*" "a" "a"])
+
+(AST-JSON ["function" "sum" ["a" "b"]
+            [+ [* "a" "a"] [* "b" "b"]]])
+
+'[function sum [a b]
+    [+ [* a a] [* b b]]]
+
+'(function sum [a b]
+           (+ (* a a) (* b b)))
+
+(def ast
+  '(defn sum [a b]
+    (+ (* a a) (* b b))))
+(map (comp count str) ast)
+
+(eval ast)
+
+(defn sum [a b]
+  (+ (* a a) (* b b)))
+
+(sum 2 3)
+
+
+(THIS is HOMOICONICITY)
+
+
+(WHAT Primitives)
 
 (type 1)
 
@@ -11,70 +65,150 @@
 (type #"^")
 
 
-
-
-
-"Strings"
-
 (type "Text")
 
 (type 'Text)
 
+('add 2 3)
+
+
 (type :Text)
 
+{:a 1,:b 2}
+
+(name :text)
+
+(name 'text)
 
 
 
 "Composites"
 
-
-
 (type '(1 2 3))
 
+(list 1 2 3)
+
 (type [1 2 3])
+
+(vector 1 2 3)
 
 (type #{1 2 3})
 
 (type {:a 1 :b 2 :c 3})
 
+(def colls [[1 2 3] #{1 2 3} '(1 2 3)])
+
+
+(map (fn [c] (conj c 4)) colls)
+
+(map first colls)
+
+(map rest colls)
+
+(map #(reduce + 0 %) colls)
+
+(map #(filter odd? %) colls)
+
+(get [1 2 3 4] 2)
+
+(->> (range)
+     (filter odd?)
+     (take 105))
+
+(def my-map {:a 1 :b 3})
+
+(get my-map :a)
+
+(:a my-map)
+
+(my-map :a)
+
+(assoc my-map :d 5)
+
+(reduce (fn [acc [k v]] (+ acc v)) 0 my-map)
+
+(filter (fn [[k v]] (> v 2)) my-map)
+
+(dissoc my-map :a)
+
+(get-in {:a {:b 5}} [:a :b])
+
+(update-in {:a {:b 5}} [:a :b] inc)
+
+(merge {:a 1} {:b 2})
+
 
 "Built Ins"
 
+;; def
 (def mysymbol "value")
 
 (str "Mysymbol: " mysymbol)
 
+;; symbols and vars
 
+mysymbol
+
+(type mysymbol)
+
+(type (var mysymbol))
+
+#'mysymbol
+
+(->> *ns*
+     (ns-publics)
+     (keys)
+     (sort)
+     (take 10))
+
+(->> 'clojure.core
+     (ns-publics)
+     (keys)
+     (sort)
+     (take 10))
+
+(type *ns*)
+
+(keys (ns-aliases *ns*))
+
+(require '[clojure.repl :as repl])
+
+(keys (ns-aliases *ns*))
+
+(keys (ns-publics 'clojure.repl))
+
+(repl/apropos "reduce")
+
+
+;; if
 (if true "true" "false")
 
-(do (println "one") (println "two") "ok")
+;; do
+(do (println "one")
+    (println "two")
+    "ok")
 
+;; let
 (let [a 1] (+ a 2))
 
 ;; destructring
+
+(let [[a b] [1 2]] (+ a b))
+
+(let [[a & rst] [1 2 3 4 5]] rst)
+
+(let [{a :a} {:a 1 :b 2}] a)
+
 (let [[a b] [1 2]
       {c :k} {:k 3}]
   (+ a b c))
 
-
+;; quotation
 (quote (+ 1 2))
 
 '(+ 1 2)
 
 (type '(+ 1 2))
-
-
-;; symbols and vars
-
-(var mysymbol)
-
-(def ups "ups")
-
-mysymbol
-
-#'mysymbol
-
-(keys (ns-publics 'jug.hello))
 
 
 ;; functions
@@ -107,6 +241,17 @@ mysymbol
 (defn strlen [^String x] (.length x))
 
 (strlen "hello")
+
+(defn multi-arity
+  ([x] 1)
+  ([x y] 2)
+  ([x y & z] (+ 2 (count z))))
+
+(multi-arity 1)
+
+(multi-arity 1 2)
+
+(multi-arity 1 2 3 5)
 
 
 "loop/recur"
@@ -144,48 +289,6 @@ mysymbol
       :when (odd? x)]
   (inc x))
 
-"Composites"
-
-(first [1 2 3])
-
-(rest [1 2 3])
-
-(conj [1] 2)
-
-(conj #{1} 2)
-
-(conj '(1) 2)
-
-(map inc [1 2 3])
-
-(reduce (fn [a x] (+ a x)) 0 [1 2 3])
-
-((juxt inc dec #(* 5 %)) 1)
-
-(let [xs [1 2 3]]
-  {:xs xs
-   :uxs (conj xs 4)})
-
-(def man {:name "Nicola"})
-
-(:name man)
-
-(man :name)
-
-(get man :name)
-
-(assoc man :age 35)
-
-(dissoc man :name)
-
-(def man {:name "Nicola" :contacts {:home "home"}})
-
-(get-in man [:contacts :home])
-
-(update-in man [:contacts :home] str "!")
-
-(merge {:a 1} {:b 2})
-
 "persistence"
 
 (= (hash "hello")
@@ -196,28 +299,33 @@ mysymbol
 
 "
 Persistent?
-Like copy, but fixed price cpu & memory
+Like copy, but fixed price by cpu & memory
 "
 
 clojure.lang.PersistentVector
 
 (def prefix-tree
-  {\j { \a {\v {\a {:present true}}}
-        \v {\m {:present true}}
-        \i {\t {:present true}}}})
+  {\j { \a {\v {\a {:value "java"}}}
+        \v {\m {:value "jvm"}}
+        \i {\t {:value "jit"}}}})
 
-(defn in? [tree el]
-  (loop [node tree
-         [ch & chs] (seq el)]
-    (if-not chs
-      (get-in node [ch :present])
-      (if-let [next-node (get node ch)]
-        (recur next-node chs)
-        false))))
+'PERSISTENCE
 
-(in? prefix-tree "jit")
+(def trie {:a {:aa {:aaa 1}}
+              {:b  {:c 2}}
+              {:aa {:aaa 3}}})
 
-(in? prefix-tree "jito")
+(def new-trie {:a' {:aa  {:aaa 1}}
+                   {:b'  {:c' 3}}
+                   {:aa  {:aaa 3}}})
+
+'(STRUCTURE-SHARING & PATH-COPYING)
+
+;; HAMT
+;; hash array mapped trie
+
+(def node {:bitmap   [1 0 0 1]
+           :children ['node-ref 'node-ref]})
 
 (hash \h)
 
@@ -231,13 +339,20 @@ clojure.lang.PersistentVector
 
 (def mystate (atom []))
 
+
+(defmacro sleep-rand []
+  `(java.lang.Thread/sleep (rand 100)))
+
 (defmacro in-thread [& bd]
   `(.start (Thread. (fn [] ~@bd))))
 
+(defmacro in-thread-rand [& bd]
+  `(in-thread (sleep-rand) ~@bd))
+
 (dotimes [i 10]
-  (in-thread
-   (java.lang.Thread/sleep (rand 100))
-   (swap! mystate conj i)))
+  (in-thread-rand (swap! mystate conj i)))
+
+@mystate
 
 (reset! mystate [])
 
@@ -288,3 +403,33 @@ clojure.lang.PersistentVector
 (to-sql #inst"2011-01-01")
 
 (to-sql {:a 1})
+
+
+'MULTI-METHOD
+'runtime-polymorphism
+
+(defmulti encounter (fn [x y] [(:Species x) (:Species y)]))
+
+(defmethod encounter [:Bunny :Lion] [b l] :run-away)
+
+(defmethod encounter [:Lion :Bunny] [l b] :eat)
+
+(defmethod encounter [:Lion :Lion] [l1 l2] :fight)
+
+(defmethod encounter [:Bunny :Bunny] [b1 b2] :mate)
+
+(def b1 {:Species :Bunny :other :stuff})
+
+(def b2 {:Species :Bunny :other :stuff})
+
+(def l1 {:Species :Lion :other :stuff})
+
+(def l2 {:Species :Lion :other :stuff})
+
+(encounter b1 b2)
+
+(encounter b1 l1)
+
+(encounter l1 b1)
+
+(encounter l1 l2)

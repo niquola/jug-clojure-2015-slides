@@ -9,6 +9,7 @@
             [org.httpkit.server :as ohs]
             [cheshire.core :as json]
             [jug.db :as db]
+            [clojure.stacktrace :as trc]
             [environ.core :refer [env]]))
 
 (def home-page
@@ -28,49 +29,24 @@
        " in order to start the compiler"]]
      (include-js "js/app.js")]]))
 
-(defonce users (atom #{}))
-
-(defn broad-cast [msg]
-  (doseq [u @users]
-    (ohs/send! u msg)))
-
-@users
-
-(broad-cast "Hello from server")
-
-(defn to-json [m]
-  (json/generate-string m))
-
-
-(defn on-new-user [ch]
-  (swap! users conj ch)
-  (doseq [m (db/list-messages)] 
-    (:content m)
-    (ohs/send! ch (str m))))
-
-(defn on-message [txt]
-  (let [msg (read-string txt)
-        msg (db/create-message msg)]
-    (broad-cast (str msg))))
-
-(comment
-  (doseq [x (range 1000)]
-    (broad-cast (str {:id (str "i-" x) :sender "Bot" :content x}))
-    (java.lang.Thread/sleep 2)))
-
-
-(defn chat [req]
-  (ohs/with-channel req ch
-    (on-new-user ch)
-    (ohs/on-receive ch on-message)
-    (ohs/on-close ch (fn [_] (swap! users disj ch)))))
+(defn repl [req] {:body "ups"})
 
 (defroutes routes
   (GET "/" [] home-page)
-  (GET "/chat" [] #'chat)
+  (GET "/repl" [] #'repl)
   (resources "/")
   (not-found "Not Found"))
 
 (def app
   (let [handler (wrap-defaults #'routes site-defaults)]
     (if (env :dev) (-> handler wrap-exceptions wrap-reload) handler)))
+
+
+(defn start []
+  (def stop
+    (ohs/run-server #'app {:port 3000})))
+
+(comment
+  (stop)
+  (start)
+  (require '[vinyasa.pull :as vp]))

@@ -70,7 +70,7 @@
                                 (pjstadig.humane-test-output/activate!)]
 
                    :figwheel {:http-server-root "public"
-                              :server-port 3449
+                              :server-port 3001
                               :nrepl-port 7002
                               :css-dirs ["resources/public/css"]
                               :ring-handler jug.handler/app}
