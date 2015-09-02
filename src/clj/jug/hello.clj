@@ -6,6 +6,7 @@
 (defmacro THIS [& x])
 (defmacro JS [& x])
 (defmacro AST-JSON [& x])
+;; Постановка задаи
 
 (WHAT is clojure?)
 
@@ -31,11 +32,18 @@
 
 (AST-JSON node -> ["*" "a" "a"])
 
-(AST-JSON ["function" "sum" ["a" "b"]
-            [+ [* "a" "a"] [* "b" "b"]]])
+(AST-JSON ["function","sum",["a","b"]
+           ["+",
+            [*,"a","a"],
+            ["*","b","b"]]])
 
 '[function sum [a b]
-    [+ [* a a] [* b b]]]
+  [+
+   [* a a]
+   [* b b]]]
+
+;; TODO LISP  Why ()
+;; LISP history
 
 '(function sum [a b]
            (+ (* a a) (* b b)))
@@ -43,6 +51,10 @@
 (def ast
   '(defn sum [a b]
     (+ (* a a) (* b b))))
+
+
+;; evaluation
+
 (map (comp count str) ast)
 
 (eval ast)
@@ -52,9 +64,15 @@
 
 (sum 2 3)
 
+(map str '(+ 1 2))
+
+(eval '(+ 1 2))
 
 (THIS is HOMOICONICITY)
 
+
+'(form args args)
+'(form is (or bult-in fn-call macro-call))
 
 (WHAT Primitives)
 
@@ -69,26 +87,16 @@
 
 (type 'Text)
 
-('add 2 3)
-
-
 (type :Text)
 
-{:a 1,:b 2}
 
-(name :text)
-
-(name 'text)
-
-
-
-"Composites"
+'COMPOSITES
 
 (type '(1 2 3))
 
 (list 1 2 3)
 
-(type [1 2 3])
+(type [1,2,3])
 
 (vector 1 2 3)
 
@@ -98,24 +106,27 @@
 
 (def colls [[1 2 3] #{1 2 3} '(1 2 3)])
 
-
 (map (fn [c] (conj c 4)) colls)
 
 (map first colls)
 
 (map rest colls)
 
+;; replace with fn
 (map #(reduce + 0 %) colls)
 
 (map #(filter odd? %) colls)
 
 (get [1 2 3 4] 2)
 
+;; move to macros
 (->> (range)
      (filter odd?)
      (take 105))
 
-(def my-map {:a 1 :b 3})
+(def my-map {:a 1,:b 3})
+
+;; reduce this part
 
 (get my-map :a)
 
@@ -137,6 +148,7 @@
 
 (merge {:a 1} {:b 2})
 
+"Persistent"
 
 "Built Ins"
 
@@ -337,7 +349,7 @@ clojure.lang.PersistentVector
 
 "STATE"
 
-(def mystate (atom []))
+(def mystate (atom 0))
 
 
 (defmacro sleep-rand []
@@ -352,7 +364,11 @@ clojure.lang.PersistentVector
 (dotimes [i 10]
   (in-thread-rand (swap! mystate conj i)))
 
+(swap! mystate inc)
+
 @mystate
+
+(deref mystate)
 
 (reset! mystate [])
 
