@@ -29,7 +29,44 @@
        " in order to start the compiler"]]
      (include-js "js/app.js")]]))
 
-(defn repl [req] {:body "ups"})
+(def clients (atom #{}))
+
+(def messages (atom []))
+
+
+
+(defn on-close [ch]
+  (swap! clients disj ch))
+
+(defn decode [x] (read-string x))
+
+(defn encode [x] (pr-str x))
+
+(defn on-connect [ch]
+  (swap! clients conj ch)
+  (ohs/send! ch (encode @messages)))
+
+(defn broad-cast [msg]
+  (let [data (encode msg)]
+    (doseq [ch @clients]
+      (println "Send to " ch " " data)
+      (try
+        (ohs/send! ch data)
+        (catch Exception e
+          (println (pr-str e)))))))
+
+(defn on-message [data]
+  (let [msg (decode data)]
+    (swap! messages conj msg)
+    (broad-cast [msg])))
+
+(defn repl [req]
+  (ohs/with-channel req ch
+    (on-connect ch)
+    (ohs/on-close ch (fn [_] (on-close ch)))
+    (ohs/on-receive ch (fn [data]
+                         (println "receive:" data)
+                         (on-message data)))))
 
 (defroutes routes
   (GET "/" [] home-page)

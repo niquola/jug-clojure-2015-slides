@@ -28,19 +28,18 @@
 
 (defn home-page []
   [:div.container
-   [:h3 "Hello"]
+   [:p "jug-repl"]
    #_[:pre (pr-str @state)]
    [:form {:on-submit (on-submit [:form] send-message)}
-    [:input.form-control (bind [:form :name] {:placeholder "name"}) ]
-    [:input.form-control (bind [:form :expr] {:placeholder "expr"}) ]
+    [:input (bind [:form :name] {:placeholder "name"}) ]
+    [:input (bind [:form :expr] {:placeholder "expr"}) ]
     [:button.btn {:type "submit"} "submit"]]
    [:hr]
    [:div.messages
     (for [m (:messages @state)]
       [:div.messages {:key (:id m)}
-       [:b (:sender m)]
-       [:pre (:expr m)]
-       [:pre.res (:result m)]])]])
+       [:pre.col-md-8 [:b (:sender m)] (:expr m)]
+       [:pre.col-md-4.res (:result m)]])]])
 
 (defn mount-root []
   (reagent/render [home-page]
