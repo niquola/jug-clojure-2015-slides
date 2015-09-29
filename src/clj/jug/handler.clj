@@ -29,3 +29,30 @@
   (stop)
   (start)
   (require '[vinyasa.pull :as vp]))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+(comment
+      (html
+            [:h1 {:style {:color "white"}}"hello"]))

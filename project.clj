@@ -33,7 +33,7 @@
 
   :uberjar-name "jug.jar"
 
-  :main jug.server
+  :main jug.handler
 
   :clean-targets ^{:protect false} [:target-path
                                     [:cljsbuild :builds :app :compiler :output-dir]
