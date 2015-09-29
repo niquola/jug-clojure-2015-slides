@@ -31,10 +31,6 @@
     (aset ws "onmessage" (fn [ev] (on-receive (.-data ev))))
     (aset ws "onclose" init-socket)))
 
-
-(defn mk-setter [pth]
-  (fn [v] (swap! state update-in pth v)))
-
 (defn on-submit [pth f]
   (fn [ev] (.preventDefault ev)
     (f (get-in @state pth))))

@@ -12,7 +12,6 @@
                  [reagent-utils "0.1.5"]
                  [ring "1.4.0"]
                  [ring/ring-defaults "0.1.5"]
-                 [org.postgresql/postgresql "9.3-1101-jdbc41"]
                  [prismatic/schema "0.4.4"]
                  [prone "0.8.2"]
                  [org.clojure/java.jdbc "0.3.7"]

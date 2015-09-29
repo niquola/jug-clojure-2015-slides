@@ -8,26 +8,8 @@
             [ring.middleware.reload :refer [wrap-reload]]
             [org.httpkit.server :as ohs]
             [cheshire.core :as json]
-            [jug.db :as db]
             [clojure.stacktrace :as trace]
             [environ.core :refer [env]]))
-
-(def home-page
-  (html
-   [:html
-    [:head
-     [:meta {:charset "utf-8"}]
-     [:meta {:name "viewport"
-             :content "width=device-width, initial-scale=1"}]
-     (include-css "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css")
-     (include-css (if (env :dev) "css/site.css" "css/site.min.css"))]
-    [:body
-     [:div#app
-      [:h3 "ClojureScript has not been compiled!"]
-      [:p "please run "
-       [:b "lein figwheel"]
-       " in order to start the compiler"]]
-     (include-js "js/app.js")]]))
 
 (defn repl-eval [s]
   (with-out-str
@@ -79,7 +61,7 @@
                          (on-message data)))))
 
 (defroutes routes
-  (GET "/" [] home-page)
+  ;(GET "/" [] home-page)
   (GET "/repl" [] #'repl)
   (resources "/")
   (not-found "Not Found"))
