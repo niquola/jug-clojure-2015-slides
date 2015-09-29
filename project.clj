@@ -14,6 +14,7 @@
                  [ring/ring-defaults "0.1.5"]
                  [org.postgresql/postgresql "9.3-1101-jdbc41"]
                  [prismatic/schema "0.4.4"]
+                 [garden "1.3.0-SNAPSHOT"]
                  [prone "0.8.2"]
                  [org.clojure/java.jdbc "0.3.7"]
                  [honeysql "0.6.0"]
@@ -34,7 +35,7 @@
 
   :uberjar-name "jug.jar"
 
-  :main jug.server
+  :main jug.core
 
   :clean-targets ^{:protect false} [:target-path
                                     [:cljsbuild :builds :app :compiler :output-dir]
@@ -53,9 +54,7 @@
                                         :optimizations :none
                                         :pretty-print  true}}}}
 
-  :profiles {:dev {:repl-options {:init-ns jug.repl}
-
-                   :dependencies [[ring/ring-mock "0.2.0"]
+  :profiles {:dev {:dependencies [[ring/ring-mock "0.2.0"]
                                   [ring/ring-devel "1.4.0"]
                                   [lein-figwheel "0.3.7"]
                                   [im.chit/vinyasa "0.3.4"]
@@ -73,7 +72,7 @@
                               :server-port 3001
                               :nrepl-port 7002
                               :css-dirs ["resources/public/css"]
-                              :ring-handler jug.handler/app}
+                              :ring-handler jug.core/app}
 
                    :env {:dev true}
 

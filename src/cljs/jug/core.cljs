@@ -1,26 +1,33 @@
 (ns jug.core
     (:require [reagent.core :as reagent :refer [atom]]
+              [jug.utils :as u]
               [cljs.reader :as reader]))
 
-(def state (atom {:form {:sender "nicola"
+(defonce state (atom {:form {:sender "nicola"
                          :expr "(+ 1 1)"}
-                  :messages [{:id 1 :sender "igor" :expr "1" :result "1"}]}))
+                  :messages [{:id 1 :ts (js/Date.) :sender "igor" :expr "1" :result "1"}]}))
 
 (defonce socket (atom nil))
 
 (def encode pr-str)
 (def decode reader/read-string)
 
-(defn log [lbl x] (.log js/console lbl (pr-str x)))
+(defn log [lbl & x] (.log js/console lbl (pr-str x)))
 
 (defn send [msg]
   (when-let [ws @socket]
     (.send ws (encode msg))))
 
+(defn reload-css [css]
+  (println "Reload css" css)
+  (aset (.getElementById js/document "stylo") "innerHTML" css))
+
 (defn on-receive [data]
-  (let [msg (decode data)]
-    (log "Data from ws:" msg)
-    (swap! state update-in [:messages] into msg)))
+  (let [[ev msg] (decode data)]
+    (log "Data from ws:" ev msg)
+    (cond
+      (= :css ev)    (reload-css msg)
+      (= :result ev) (swap! state update-in [:messages] conj msg))))
 
 (defn init-socket []
   (let [l (.-location js/window)
@@ -52,18 +59,18 @@
 
 
 (defn home-page []
-  [:div.container
-   [:p "jug-repl"]
-   #_[:pre (pr-str @state)]
-   [:form {:on-submit (on-submit [:form] send-message)}
-    [:input (bind [:form :sender] {:placeholder "name"}) ]
-    [:input (bind [:form :expr] {:placeholder "expr" :required true}) ]
-    [:button.btn {:type "submit"} "submit"]]
-   [:hr]
-   [:div.messages
-    (for [m (:messages @state)]
-      [:pre.messages {:key (:id m)}
-       [:b (:sender m)] ":  " (:expr m) " => " (:result m)])]])
+  [:div.wrap
+   [:div.menu "jug-repl"]
+   [:div.container
+    [:form.expressions {:on-submit (on-submit [:form] send-message)}
+     [:input.form-control (bind [:form :sender] {:placeholder "name"}) ]
+     [:textarea.form-control.input (bind [:form :expr] {:placeholder "expr" :required true}) ]
+     [:button.btn.btn-success {:type "submit"} "submit"]]
+    [:hr]
+    [:div.messages
+     (for [m (:messages @state)]
+       [:pre.messages {:key (:id m)}
+        [:b (:sender m)] " " (u/format-date :SHORT_TIME (:ts m)) ":  " (:expr m) " => " (:result m)])]]])
 
 (defn mount-root []
   (reagent/render [home-page]

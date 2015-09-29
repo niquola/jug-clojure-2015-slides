@@ -30,8 +30,6 @@
   (migrate-down!)
   (migrate-up))
 
-(recreate)
-
 
 (defn create [msg]
   (first (jdbc/insert! db :repl msg)))
