@@ -8,10 +8,14 @@
                       :form     {:author "me"
                                  :expr   "(+1 2)"}}))
 
+(defn on-message [message]
+  (swap! state update-in [:messages] conj message))
+
 (defn submit [e]
   (.preventDefault e)
   (.log  js/console e)
-  (swap! state update-in [:messages] conj (:form @state)))
+  (let [message (:form @state)]
+    (on-message message)))
 
 (defn bind [path]
   (fn [evt]
